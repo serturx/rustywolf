@@ -1,0 +1,4 @@
+Settings(
+    resolution: (800, 600),
+    language: "en",
+)
