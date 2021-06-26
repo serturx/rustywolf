@@ -1,5 +1,9 @@
 mod gpu;
 mod localisation;
+mod settings;
+
+use settings::Settings;
+
 use glfw::{Action, Context, Key};
 
 fn main() {
@@ -14,7 +18,10 @@ fn main() {
     gl::load_with(|s| window.get_proc_address(s) as *const _);
     gpu::debug::init();
 
+    let settings = Settings::load();
     let i18n = localisation::i18n::from("en_GB").expect("Can't load localisation");
+
+    println!("{:?}", settings);
 
     while !window.should_close() {
         glfw.poll_events();

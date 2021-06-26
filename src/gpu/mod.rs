@@ -6,5 +6,6 @@ mod texturesampler;
 
 pub use framebuffer::Framebuffer;
 pub use shader::Shader;
+pub use ssbo::ISSBO;
 pub use ssbo::SSBO;
 pub use texturesampler::TextureSampler;
