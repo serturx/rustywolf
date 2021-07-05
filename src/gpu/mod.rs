@@ -10,7 +10,7 @@ pub use ssbo::ISSBO;
 pub use ssbo::SSBO;
 pub use texturesampler::TextureSampler;
 
-pub const INT32: isize = 4;
-pub const UINT32: isize = 4;
-pub const FLOAT32: isize = 4;
-pub const FLOAT64: isize = 8;
+pub const INT: isize = 4;
+pub const UINT: isize = 4;
+pub const FLOAT: isize = 4;
+pub const DOUBLE: isize = 8;

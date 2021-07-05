@@ -40,7 +40,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let i18n = I18n::from("en_GB")?;
 
-    let mut player = Player::from(Vector2::new(1.0, 1.0));
+    let mut player = Player::from(Vector2::new(2.0, 2.0));
 
     let map = world::World::load("test_map_1")?;
     println!("Playing {}", i18n.get_translation(map.identifier()));
@@ -78,12 +78,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let _gpu_slice_data = gpu::SSBO::empty(
         5,
-        3 * settings.resolution.0 as isize * gpu::INT32,
+        3 * settings.resolution.0 as isize * gpu::INT,
         gl::DYNAMIC_DRAW,
     );
     let _gpu_caf_data = gpu::SSBO::empty(
         6,
-        4 * settings.resolution.1 as isize * gpu::FLOAT32,
+        4 * settings.resolution.1 as isize * gpu::FLOAT,
         gl::DYNAMIC_DRAW,
     );
 
