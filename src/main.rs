@@ -7,7 +7,6 @@ mod world;
 
 use glfw::{Action, Context, Key};
 use std::time::Instant;
-use world::World;
 
 use localisation::I18n;
 use player::Player;
@@ -102,12 +101,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         mouse_delta.set(mx as f32 - mouse_pos.x, my as f32 - mouse_pos.y);
         mouse_pos.set(mx as f32, my as f32);
 
+        player.update_position(&map, delta_time);
         player.rotate_by_mouse(&mouse_delta, delta_time);
         gpu_player.update(&player);
 
         glfw.poll_events();
         for (_, event) in glfw::flush_messages(&events) {
-            handle_window_event(&mut window, event, &mut player, &map, delta_time);
+            handle_window_event(&mut window, event, &mut player);
         }
 
         unsafe {
@@ -150,28 +150,38 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn handle_window_event(
-    window: &mut glfw::Window,
-    event: glfw::WindowEvent,
-    player: &mut Player,
-    world: &World,
-    delta_time: f32,
-) {
+fn handle_window_event(window: &mut glfw::Window, event: glfw::WindowEvent, player: &mut Player) {
     match event {
         glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
             window.set_cursor_mode(glfw::CursorMode::Normal);
         }
+
         glfw::WindowEvent::Key(Key::W, _, Action::Press, _) => {
-            player.step_forward(world, delta_time);
+            player.start_movement(player::FORWARDS);
         }
+        glfw::WindowEvent::Key(Key::W, _, Action::Release, _) => {
+            player.end_movement(player::FORWARDS);
+        }
+
         glfw::WindowEvent::Key(Key::S, _, Action::Press, _) => {
-            player.step_backward(world, delta_time);
+            player.start_movement(player::BACKWARDS);
         }
+        glfw::WindowEvent::Key(Key::S, _, Action::Release, _) => {
+            player.end_movement(player::BACKWARDS);
+        }
+
         glfw::WindowEvent::Key(Key::D, _, Action::Press, _) => {
-            player.step_right(world, delta_time);
+            player.start_movement(player::RIGHT);
         }
+        glfw::WindowEvent::Key(Key::D, _, Action::Release, _) => {
+            player.end_movement(player::RIGHT);
+        }
+
         glfw::WindowEvent::Key(Key::A, _, Action::Press, _) => {
-            player.step_left(world, delta_time);
+            player.start_movement(player::LEFT);
+        }
+        glfw::WindowEvent::Key(Key::A, _, Action::Release, _) => {
+            player.end_movement(player::LEFT);
         }
         _ => {}
     }

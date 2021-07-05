@@ -5,11 +5,18 @@ use super::world::World;
 const ROTATION_SPEED: f32 = 0.5;
 const MOVEMENT_SPEED: f32 = 5.0;
 
+type MoveDir = usize;
+pub const FORWARDS: MoveDir = 0;
+pub const BACKWARDS: MoveDir = 1;
+pub const RIGHT: MoveDir = 2;
+pub const LEFT: MoveDir = 3;
+
 #[repr(C)]
 pub struct Player {
     position: Vector2<f32>,
     direction: Vector2<f32>,
     camera_plane: Vector2<f32>,
+    movement: [bool; 4], //Forward,Backward,Right,Left
 }
 
 impl ISSBO for Player {}
@@ -20,6 +27,7 @@ impl Player {
             position,
             direction: Vector2::new(-0.75, 0.0),
             camera_plane: Vector2::new(0.0, 0.66),
+            movement: [false, false, false, false],
         };
     }
 
@@ -37,7 +45,33 @@ impl Player {
         self.rotate(rel_mov.x * ROTATION_SPEED * delta_time * -1.0);
     }
 
-    pub fn step_forward(&mut self, world: &World, delta_time: f32) {
+    pub fn update_position(&mut self, world: &World, delta_time: f32) {
+        if self.movement[FORWARDS] {
+            self.step_forward(world, delta_time);
+        }
+
+        if self.movement[BACKWARDS] {
+            self.step_backward(world, delta_time);
+        }
+
+        if self.movement[RIGHT] {
+            self.step_right(world, delta_time);
+        }
+
+        if self.movement[LEFT] {
+            self.step_left(world, delta_time);
+        }
+    }
+
+    pub fn start_movement(&mut self, dir: MoveDir) {
+        self.movement[dir] = true;
+    }
+
+    pub fn end_movement(&mut self, dir: MoveDir) {
+        self.movement[dir] = false;
+    }
+
+    fn step_forward(&mut self, world: &World, delta_time: f32) {
         let future_x = self.position.x + self.direction.x * MOVEMENT_SPEED * delta_time;
         if *world.at(future_x as u32, self.position.y as u32) == 0 {
             self.position.x = future_x;
@@ -49,7 +83,7 @@ impl Player {
         }
     }
 
-    pub fn step_backward(&mut self, world: &World, delta_time: f32) {
+    fn step_backward(&mut self, world: &World, delta_time: f32) {
         let future_x = self.position.x - self.direction.x * MOVEMENT_SPEED * delta_time;
         if *world.at(future_x as u32, self.position.y as u32) == 0 {
             self.position.x = future_x;
@@ -61,7 +95,7 @@ impl Player {
         }
     }
 
-    pub fn step_right(&mut self, world: &World, delta_time: f32) {
+    fn step_right(&mut self, world: &World, delta_time: f32) {
         let future_x = self.position.x + self.camera_plane.x * MOVEMENT_SPEED * delta_time;
         if *world.at(future_x as u32, self.position.y as u32) == 0 {
             self.position.x = future_x;
@@ -73,7 +107,7 @@ impl Player {
         }
     }
 
-    pub fn step_left(&mut self, world: &World, delta_time: f32) {
+    fn step_left(&mut self, world: &World, delta_time: f32) {
         let future_x = self.position.x - self.camera_plane.x * MOVEMENT_SPEED * delta_time;
         if *world.at(future_x as u32, self.position.y as u32) == 0 {
             self.position.x = future_x;
