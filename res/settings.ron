@@ -1,4 +1,4 @@
 Settings(
-    resolution: (800, 600),
+    resolution: (1280, 720),
     language: "en_GB",
 )

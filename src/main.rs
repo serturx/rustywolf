@@ -9,7 +9,7 @@ use glfw::{Action, Context, Key};
 use std::time::Instant;
 use world::World;
 
-use localisation::i18n;
+use localisation::I18n;
 use player::Player;
 use settings::Settings;
 use vector::Vector2;
@@ -17,8 +17,15 @@ use vector::Vector2;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS)?;
 
+    let settings = Settings::load();
+
     let (mut window, events) = glfw
-        .create_window(800, 600, "Raster", glfw::WindowMode::Windowed)
+        .create_window(
+            settings.resolution.0,
+            settings.resolution.1,
+            "Raster",
+            glfw::WindowMode::Windowed,
+        )
         .expect("Failed to create GLFW window");
 
     window.set_key_polling(true);
@@ -32,12 +39,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     glfw.set_swap_interval(glfw::SwapInterval::Sync(1));
 
-    let settings = Settings::load();
-    let i18n = i18n::from("en_GB")?;
+    let i18n = I18n::from("en_GB")?;
 
     let mut player = Player::from(Vector2::new(1.0, 1.0));
 
     let map = world::World::load("test_map_1")?;
+    println!("Playing {}", i18n.get_translation(map.identifier()));
 
     let pre_cf_shader = gpu::Shader::from(
         "./src/shader/ceiling_floor/preprocess.glsl",

@@ -2,7 +2,7 @@ use super::gpu::ISSBO;
 use super::vector::Vector2;
 use super::world::World;
 
-const ROTATION_SPEED: f32 = 2.0;
+const ROTATION_SPEED: f32 = 0.5;
 const MOVEMENT_SPEED: f32 = 5.0;
 
 #[repr(C)]

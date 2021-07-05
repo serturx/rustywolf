@@ -57,6 +57,10 @@ impl World {
         Ok(world)
     }
 
+    pub fn identifier(&self) -> &String {
+        return &self.identifier;
+    }
+
     pub fn as_vec_for_gpu(&self) -> Vec<u32> {
         return self.structure.as_vec_for_gpu();
     }
