@@ -4,10 +4,11 @@ use std::fs;
 
 const RES_SETTINGS: &str = "./res/settings.ron";
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize)]
+#[repr(C)]
 pub struct Settings {
-    resolution: (usize, usize),
-    language: String,
+    pub resolution: (u32, u32),
+    pub language: String,
 }
 
 impl ISSBO for Settings {}

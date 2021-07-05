@@ -13,8 +13,8 @@ impl Drop for Shader {
 }
 
 impl Shader {
-    pub fn from(path: &str, shader_type: u32) -> Result<Shader, String> {
-        let source = fs::read_to_string(path).map_err(|e| e.to_string())?;
+    pub fn from(path: &str, shader_type: u32) -> Result<Shader, Box<dyn std::error::Error>> {
+        let source = fs::read_to_string(path)?;
 
         let shader = Shader {
             id: unsafe { gl::CreateShader(shader_type) },
@@ -36,7 +36,7 @@ impl Shader {
         };
 
         if !success {
-            return Err(shader.compilation_log());
+            return Err(shader.compilation_log())?;
         }
 
         let p_id = unsafe { gl::CreateProgram() };

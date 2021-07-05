@@ -1,3 +1,5 @@
+use std::ffi::c_void;
+
 ///Abstracts an OpenGL framebuffer
 pub struct Framebuffer {
     pub texture_id: u32,
@@ -36,7 +38,7 @@ impl Framebuffer {
                 0,
                 gl::RGBA,
                 gl::FLOAT,
-                0 as *const std::ffi::c_void,
+                std::ptr::null() as *const c_void,
             );
             gl::BindImageTexture(
                 binding,
@@ -44,7 +46,7 @@ impl Framebuffer {
                 0,
                 gl::FALSE,
                 0,
-                gl::WRITE_ONLY,
+                gl::READ_WRITE,
                 gl::RGBA32F,
             );
 

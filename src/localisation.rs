@@ -9,12 +9,10 @@ pub struct i18n {
 }
 
 impl i18n {
-    pub fn from(lang: &str) -> Result<i18n, String> {
-        let file_content = fs::read_to_string(&(RES_I18N.to_owned() + lang + ".ron"))
-            .map_err(|e| e.to_string())?;
+    pub fn from(lang: &str) -> Result<i18n, Box<dyn std::error::Error>> {
+        let file_content = fs::read_to_string(&(RES_I18N.to_owned() + lang + ".ron"))?;
 
-        let dict: HashMap<String, String> =
-            ron::from_str(&file_content).map_err(|e| e.to_string())?;
+        let dict: HashMap<String, String> = ron::from_str(&file_content)?;
 
         return Ok(i18n { dict });
     }

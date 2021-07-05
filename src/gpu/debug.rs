@@ -1,9 +1,9 @@
-use std::ffi::c_void;
+use std::ffi::{c_void, CStr};
 
 pub fn init() {
     unsafe {
         gl::Enable(gl::DEBUG_OUTPUT);
-        gl::DebugMessageCallback(Some(gl_callback), 0 as *const c_void);
+        gl::DebugMessageCallback(Some(gl_callback), std::ptr::null() as *const c_void);
     }
 }
 
@@ -12,7 +12,7 @@ extern "system" fn gl_callback(
     gltype: u32,
     _: u32,
     severity: u32,
-    len: i32,
+    _: i32,
     message: *const i8,
     _: *mut c_void,
 ) {
@@ -22,7 +22,7 @@ extern "system" fn gl_callback(
             gl_sources_to_string(source),
             gl_message_to_string(gltype),
             gl_error_to_string(severity),
-            String::from_raw_parts(message as *mut u8, len as usize, len as usize),
+            CStr::from_ptr(message),
         );
     }
 }
