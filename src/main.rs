@@ -61,21 +61,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         settings.resolution.1 as i32,
     );
 
-    gpu::SSBO::from(1, &settings, gl::STATIC_DRAW);
+    let _gpu_settings = gpu::SSBO::from(1, &settings, gl::STATIC_DRAW);
     let gpu_player = gpu::SSBO::from(2, &player, gl::DYNAMIC_DRAW);
 
     let map_data = map.as_vec_for_gpu();
-    gpu::SSBO::from(3, &map_data, gl::STATIC_DRAW);
+    let _gpu_map = gpu::SSBO::from(3, &map_data, gl::STATIC_DRAW);
 
     let (sheet, tile_width) = map.sampler_data();
-    let s = gpu::TextureSampler::from(4, sheet, tile_width);
+    let _sampler = gpu::TextureSampler::from(4, sheet, tile_width);
 
-    gpu::SSBO::empty(
+    let _gpu_slice_data = gpu::SSBO::empty(
         5,
         3 * settings.resolution.0 as isize * gpu::INT32,
         gl::DYNAMIC_DRAW,
     );
-    gpu::SSBO::empty(
+    let _gpu_caf_data = gpu::SSBO::empty(
         6,
         4 * settings.resolution.1 as isize * gpu::FLOAT32,
         gl::DYNAMIC_DRAW,

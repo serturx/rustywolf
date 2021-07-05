@@ -21,6 +21,12 @@ pub struct SSBO {
     pub id: u32,
 }
 
+impl Drop for SSBO {
+    fn drop(&mut self) {
+        unsafe { gl::DeleteBuffers(1, &self.id) }
+    }
+}
+
 impl SSBO {
     pub fn from<T: ISSBO>(binding: u32, obj: &T, usage: gl::types::GLenum) -> SSBO {
         let mut ssbo_id: u32 = 0;
