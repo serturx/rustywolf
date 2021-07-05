@@ -30,10 +30,8 @@ impl<T: Add> Add for Vector2<T> {
 
 impl<T: AddAssign> AddAssign for Vector2<T> {
     fn add_assign(&mut self, rhs: Self) {
-        unsafe {
-            self.x += rhs.x;
-            self.y += rhs.y;
-        }
+        self.x += rhs.x;
+        self.y += rhs.y;
     }
 }
 
@@ -50,10 +48,8 @@ impl<T: Sub> Sub for Vector2<T> {
 
 impl<T: SubAssign> SubAssign for Vector2<T> {
     fn sub_assign(&mut self, rhs: Self) {
-        unsafe {
-            self.x -= rhs.x;
-            self.y -= rhs.y;
-        }
+        self.x -= rhs.x;
+        self.y -= rhs.y;
     }
 }
 
@@ -70,10 +66,8 @@ impl<T: Mul + Copy> Mul<T> for Vector2<T> {
 
 impl<T: MulAssign + Copy> MulAssign<T> for Vector2<T> {
     fn mul_assign(&mut self, rhs: T) {
-        unsafe {
-            self.x *= rhs;
-            self.y *= rhs;
-        }
+        self.x *= rhs;
+        self.y *= rhs;
     }
 }
 
