@@ -42,7 +42,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut player = Player::from(Vector2::new(2.0, 2.0));
 
-    let map = world::World::load("test_map_1")?;
+    let map = world::World::load("test_map_2")?;
     println!("Playing {}", i18n.get_translation(map.identifier()));
 
     let pre_cf_shader = gpu::Shader::from(
