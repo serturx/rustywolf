@@ -1,5 +1,5 @@
 [package]
-name = "raster"
+name = "rustywolf"
 version = "0.1.0"
 authors = ["cherrysrc <50867655+cherrysrc@users.noreply.github.com>"]
 edition = "2018"

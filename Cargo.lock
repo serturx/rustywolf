@@ -384,17 +384,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "raster"
-version = "0.1.0"
-dependencies = [
- "gl",
- "glfw",
- "image",
- "ron",
- "serde",
-]
-
-[[package]]
 name = "raw-window-handle"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -436,6 +425,17 @@ checksum = "064ea8613fb712a19faf920022ec8ddf134984f100090764a4e1d768f3827f1f"
 dependencies = [
  "base64",
  "bitflags",
+ "serde",
+]
+
+[[package]]
+name = "rustywolf"
+version = "0.1.0"
+dependencies = [
+ "gl",
+ "glfw",
+ "image",
+ "ron",
  "serde",
 ]
 
