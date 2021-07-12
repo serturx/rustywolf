@@ -11,6 +11,5 @@ pub use ssbo::SSBO;
 pub use texturesampler::TextureSampler;
 
 pub const INT: isize = 4;
-pub const UINT: isize = 4;
 pub const FLOAT: isize = 4;
 pub const DOUBLE: isize = 8;

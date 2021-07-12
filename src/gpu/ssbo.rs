@@ -16,6 +16,13 @@ impl<T> ISSBO for Vec<T> {
     }
 }
 
+impl<T, U> ISSBO for (T, U) {
+    fn gpu_format(&self) -> (isize, *const c_void) {
+        let len = (std::mem::size_of::<T>() + std::mem::size_of::<U>()) as isize;
+        (len, self as *const _ as *const c_void)
+    }
+}
+
 ///Abstracts an OpenGL Shader Storage Buffer Object
 pub struct SSBO {
     pub id: u32,

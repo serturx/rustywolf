@@ -1,5 +1,5 @@
 use gl::types::GLint;
-use std::fs;
+use std::{ffi::CString, fs};
 
 ///Abstracts an OpenGL shader program
 pub struct Shader {
@@ -68,6 +68,15 @@ impl Shader {
         match String::from_utf8(buf) {
             Ok(log) => log,
             Err(vec) => panic!("Couldn't convert compilation log: {}", vec),
+        }
+    }
+
+    pub fn set_uint(&self, var: &str, value: u32) {
+        unsafe {
+            let s = CString::new(var).unwrap();
+            let loc = gl::GetUniformLocation(self.id, s.as_ptr());
+            gl::UseProgram(self.id);
+            gl::Uniform1ui(loc, value);
         }
     }
 

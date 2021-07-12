@@ -1,12 +1,15 @@
 use std::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
+use serde::Deserialize;
+
+#[derive(Deserialize, Clone)]
 #[repr(C)]
 pub struct Vector2<T> {
     pub x: T,
     pub y: T,
 }
 
-impl<T> Vector2<T> {
+impl<T: Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Copy> Vector2<T> {
     pub fn new(x: T, y: T) -> Vector2<T> {
         return Vector2 { x, y };
     }
@@ -14,6 +17,13 @@ impl<T> Vector2<T> {
     pub fn set(&mut self, x: T, y: T) {
         self.x = x;
         self.y = y;
+    }
+
+    pub fn dist_sq(&self, other: &Vector2<T>) -> T {
+        let dx = self.x - other.x;
+        let dy = self.y - other.y;
+
+        dx * dx + dy * dy
     }
 }
 

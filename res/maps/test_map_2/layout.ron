@@ -12,4 +12,11 @@ WorldStructure(
     ],
     ceiling_idx: 7,
     floor_idx: 4,
+    sprites: [
+        Sprite(position: Vector2(x: 1.5,y: 1.5), texture_idx: 0),
+        Sprite(position: Vector2(x: 1.5,y: 2.5), texture_idx: 1),
+        Sprite(position: Vector2(x: 1.5,y: 3.5), texture_idx: 2),
+        Sprite(position: Vector2(x: 1.5,y: 4.5), texture_idx: 3),
+        Sprite(position: Vector2(x: 1.5,y: 5.5), texture_idx: 4),
+    ]
 )

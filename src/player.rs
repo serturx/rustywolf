@@ -118,4 +118,8 @@ impl Player {
             self.position.y = future_y;
         }
     }
+
+    pub fn position(&self) -> &Vector2<f32> {
+        return &self.position;
+    }
 }

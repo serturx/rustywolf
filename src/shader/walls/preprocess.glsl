@@ -26,6 +26,10 @@ layout(std430, binding = 5) buffer SliceData {
 	int data[];
 } slice;
 
+layout(std430, binding = 7) buffer zData {
+	double data[];
+} z_buffer;
+
 uint get_world_value(int x, int y)
 {
 	return world.geometry[x + y * world.stride];
@@ -105,6 +109,8 @@ void precompute_slice(int x)
 	slice.data[x * 3 + 0] = line_height;
 	slice.data[x * 3 + 1] = tex_idx;
 	slice.data[x * 3 + 2] = texX;
+
+	z_buffer.data[x] = perp_wall_dist;
 }
 
 void main()

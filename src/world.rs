@@ -1,6 +1,8 @@
 use serde::Deserialize;
 use std::fs;
 
+use crate::sprites::Sprite;
+
 #[derive(Deserialize)]
 #[repr(C)]
 struct WorldStructure {
@@ -10,6 +12,8 @@ struct WorldStructure {
 
     ceiling_idx: u32,
     floor_idx: u32,
+
+    sprites: Vec<Sprite>,
 }
 
 impl WorldStructure {
@@ -63,6 +67,10 @@ impl World {
 
     pub fn as_vec_for_gpu(&self) -> Vec<u32> {
         return self.structure.as_vec_for_gpu();
+    }
+
+    pub fn sprites(&self) -> &Vec<Sprite> {
+        return &self.structure.sprites;
     }
 
     pub fn at(&self, x: u32, y: u32) -> &u32 {
