@@ -78,4 +78,22 @@ impl SSBO {
             gl::BindBuffer(gl::SHADER_STORAGE_BUFFER, 0);
         }
     }
+
+    pub fn retrieve<T: Default>(&self, offset: isize) -> T {
+        let data: T = Default::default();
+        unsafe {
+            gl::BindBuffer(gl::SHADER_STORAGE_BUFFER, self.id);
+
+            gl::GetNamedBufferSubData(
+                self.id,
+                offset,
+                std::mem::size_of::<T>() as isize,
+                std::mem::transmute(&data),
+            );
+
+            gl::BindBuffer(gl::SHADER_STORAGE_BUFFER, 0);
+        }
+
+        data
+    }
 }

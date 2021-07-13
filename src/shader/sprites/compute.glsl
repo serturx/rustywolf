@@ -79,13 +79,9 @@ void main()
 
 	Sprite_Preprocess_Result preprocess = sprite_preprocess.results[sprite_idx];
 
-	if (sprite_preprocess.results.length() != sprites.list.length())
-		imageStore(img, ivec2(100, 100), vec4(1.0, 1.0, 1.0, 1.0));
+	iCoords += ivec2(preprocess.draw_start_x, preprocess.draw_start_y);
 
-	if (iCoords.x < preprocess.draw_start_x || iCoords.x >= preprocess.draw_end_x || iCoords.y < preprocess.draw_start_y || iCoords.y >= preprocess.draw_end_y)
-		return;
-
-	if (preprocess.transform_y > 0 && iCoords.x > 0 && iCoords.x < settings.resolution_x && preprocess.transform_y < z_buffer.data[iCoords.x]) {
+	if (preprocess.transform_y < z_buffer.data[iCoords.x]) {
 		int d = iCoords.y * 256 - settings.resolution_y * 128 + preprocess.sprite_height * 128;
 
 		int tex_x = int(256 * (iCoords.x - (-preprocess.sprite_width / 2 + preprocess.sprite_screen_x)) * world.geometry_tile_width / preprocess.sprite_width) / 256;

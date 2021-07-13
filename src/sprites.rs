@@ -22,20 +22,21 @@ impl Sprite {
     }
 }
 
-///This struct is only for ssbo size calculation
+///This struct is for retrieving intermediate sprite processing results
 #[allow(dead_code)]
+#[derive(Default)]
 #[repr(C)]
-struct SpritePreprocessResult {
+pub struct SpritePreprocessResult {
     sprite_width: i32,
     sprite_height: i32,
 
-    draw_start_y: i32,
-    draw_end_y: i32,
-    draw_start_x: i32,
-    draw_end_x: i32,
+    pub draw_start_y: i32,
+    pub draw_end_y: i32,
+    pub draw_start_x: i32,
+    pub draw_end_x: i32,
 
     sprite_screen_x: i32,
-    transform_y: f64,
+    pub transform_y: f64,
 }
 
 pub struct Sprites {
@@ -109,6 +110,12 @@ impl Sprites {
 
             db.partial_cmp(&da).unwrap()
         });
+    }
+
+    pub fn preprocess_result(&self, index: u32) -> SpritePreprocessResult {
+        self._preprocess_ssbo.retrieve::<SpritePreprocessResult>(
+            index as isize * std::mem::size_of::<SpritePreprocessResult>() as isize,
+        )
     }
 
     pub fn len(&self) -> usize {

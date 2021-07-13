@@ -70,7 +70,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let sprite_shader = gpu::Shader::from("./src/shader/sprites/compute.glsl", gl::COMPUTE_SHADER)?;
 
-    gpu::debug::init();
+    //gpu::debug::init();
     let gpu_framebuffer = gpu::Framebuffer::create(
         0,
         settings.resolution.0 as i32,
@@ -111,6 +111,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     while !window.should_close() {
         delta_time = now.elapsed().as_secs_f32();
         now = Instant::now();
+
+        println!("{}", 1.0 / delta_time);
 
         let (mx, my) = window.get_cursor_pos();
         mouse_delta.set(mx as f32 - mouse_pos.x, my as f32 - mouse_pos.y);
@@ -164,12 +166,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         for i in 0..sprites.len() as u32 {
             sprite_shader.set_uint("sprite_idx", i);
-            sprite_shader.dispatch(
-                settings.resolution.0 as u32,
-                settings.resolution.1 as u32,
-                1,
-                gl::SHADER_IMAGE_ACCESS_BARRIER_BIT,
-            );
+
+            let preprocess = sprites.preprocess_result(i);
+
+            if preprocess.draw_end_x >= preprocess.draw_start_x && preprocess.transform_y > 0.0 {
+                let num_groups_x = (preprocess.draw_end_x - preprocess.draw_start_x) as u32;
+                let num_groups_y = (preprocess.draw_end_y - preprocess.draw_start_y) as u32;
+
+                sprite_shader.dispatch(
+                    num_groups_x.clamp(0, settings.resolution.0),
+                    num_groups_y.clamp(0, settings.resolution.1),
+                    1,
+                    gl::SHADER_IMAGE_ACCESS_BARRIER_BIT,
+                );
+            }
         }
 
         gpu_framebuffer.blit();
