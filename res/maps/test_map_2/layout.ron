@@ -16,7 +16,7 @@ WorldStructure(
         Sprite(position: Vector2(x: 1.5,y: 1.5), texture_idx: 70),
         Sprite(position: Vector2(x: 1.5,y: 2.5), texture_idx: 71),
         Sprite(position: Vector2(x: 1.5,y: 3.5), texture_idx: 72),
-        Sprite(position: Vector2(x: 1.5,y: 4.5), texture_idx: 36),
+        Sprite(position: Vector2(x: 1.5,y: 4.5), texture_idx: 33),
         Sprite(position: Vector2(x: 1.5,y: 5.5), texture_idx: 37),
     ]
 )
