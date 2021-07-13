@@ -68,13 +68,14 @@ impl Sprites {
             _preprocess_ssbo,
         };
 
-        sprites.sort(player);
-        sprites.force_gpu_update();
+        sprites.update(player);
 
         sprites
     }
 
-    pub fn add(&mut self, sprite: Sprite) {
+    ///Add a new sprite to the world
+    ///Triggers copying the new sprite list to the gpu
+    pub fn add(&mut self, sprite: Sprite, player: &Player) {
         self.sprites.push(sprite);
 
         if self.sprites.len() >= self._gpu_capacity as usize {
@@ -91,20 +92,16 @@ impl Sprites {
             );
         }
 
-        self.force_gpu_update();
+        self.update(player);
     }
 
-    ///Manually triggers copying the sprite vector to the gpu
-    //Should be called whenever a sprites position or texture is changed or a sprite gets removed/added
-    pub fn force_gpu_update(&self) {
+    ///Triggers updating the gpu data
+    pub fn update(&mut self, player: &Player) {
+        self.sort(player);
         self._sprites_ssbo.update(&self.sprites);
     }
 
-    pub fn update(&mut self, player: &Player) {
-        self.sort(player);
-        self.force_gpu_update();
-    }
-
+    ///Sorts the sprite array by the distance to the player
     fn sort(&mut self, player: &Player) {
         self.sprites.sort_by(|a, b| {
             let da = a.position.dist_sq(player.position());
