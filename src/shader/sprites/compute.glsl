@@ -57,8 +57,8 @@ float line_height_to_lod(int line_height)
 
 	float lod = 0.0;
 
-	for (double dist = perp_wall_dist; dist >= 0 && lod < 10.0; dist -= 1)
-		lod += 0.025;
+	for (double dist = perp_wall_dist - 10; dist >= 0 && lod < 10.0; dist -= 2)
+		lod += 0.005;
 	return lod;
 }
 
@@ -91,10 +91,11 @@ void main()
 		int tex_x = int(256 * (iCoords.x - (-preprocess.sprite_width / 2 + preprocess.sprite_screen_x)) * world.geometry_tile_width / preprocess.sprite_width) / 256;
 		int tex_y = int(((d * world.geometry_tile_width) / preprocess.sprite_height) / 256);
 
-		vec4 color = get_atlas_color(int(sprites.list[sprite_idx].texture_idx), tex_x, tex_y, 0.0);
-		if (color.a > 0.0)
-			imageStore(img, iCoords, color);
-		else
+		vec4 color = get_atlas_color(int(sprites.list[sprite_idx].texture_idx), tex_x, tex_y, line_height_to_lod(preprocess.draw_end_y - preprocess.draw_start_y));
+
+		if (color.a < 1.0)
 			return;
+
+		imageStore(img, iCoords, color);
 	}
 }
