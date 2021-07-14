@@ -19,12 +19,12 @@ use crate::sprites::Sprites;
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS)?;
 
-    let settings = Settings::load();
+    let mut settings = Settings::load();
 
     let (mut window, events) = glfw
         .create_window(
-            settings.resolution.0,
-            settings.resolution.1,
+            settings.resolution().0,
+            settings.resolution().1,
             "Raster",
             glfw::WindowMode::Windowed,
         )
@@ -38,6 +38,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     gl::load_with(|s| window.get_proc_address(s) as *const _);
+
+    settings.copy_to_gpu();
 
     glfw.set_swap_interval(glfw::SwapInterval::Sync(1));
 
@@ -70,14 +72,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let sprite_shader = gpu::Shader::from("./src/shader/sprites/compute.glsl", gl::COMPUTE_SHADER)?;
 
-    gpu::debug::init();
+    // gpu::debug::init();
     let gpu_framebuffer = gpu::Framebuffer::create(
         0,
-        settings.resolution.0 as i32,
-        settings.resolution.1 as i32,
+        settings.resolution().0 as i32,
+        settings.resolution().1 as i32,
     );
-
-    let _gpu_settings = gpu::SSBO::from(1, &settings, gl::STATIC_DRAW);
 
     let map_data = world.as_vec_for_gpu();
     let _gpu_map = gpu::SSBO::from(3, &map_data, gl::STATIC_DRAW);
@@ -87,17 +87,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let _gpu_slice_data = gpu::SSBO::empty(
         5,
-        3 * settings.resolution.0 as isize * gpu::INT,
+        3 * settings.resolution().0 as isize * gpu::INT,
         gl::DYNAMIC_DRAW,
     );
     let _gpu_caf_data = gpu::SSBO::empty(
         6,
-        4 * settings.resolution.1 as isize * gpu::FLOAT,
+        4 * settings.resolution().1 as isize * gpu::FLOAT,
         gl::DYNAMIC_DRAW,
     );
     let _gpu_z_buffer = gpu::SSBO::empty(
         7,
-        settings.resolution.0 as isize * gpu::DOUBLE,
+        settings.resolution().0 as isize * gpu::DOUBLE,
         gl::DYNAMIC_DRAW,
     );
 
@@ -135,28 +135,28 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         pre_cf_shader.dispatch(
             1,
-            settings.resolution.1 as u32,
+            settings.resolution().1 as u32,
             1,
             gl::SHADER_STORAGE_BARRIER_BIT,
         );
 
         cf_shader.dispatch(
-            settings.resolution.0 as u32,
-            settings.resolution.1 as u32,
+            settings.resolution().0 as u32,
+            settings.resolution().1 as u32,
             1,
             gl::SHADER_IMAGE_ACCESS_BARRIER_BIT,
         );
 
         pre_walls_shader.dispatch(
-            settings.resolution.0 as u32,
+            settings.resolution().0 as u32,
             1,
             1,
             gl::SHADER_STORAGE_BARRIER_BIT,
         );
 
         walls_shader.dispatch(
-            settings.resolution.0 as u32,
-            settings.resolution.1 as u32,
+            settings.resolution().0 as u32,
+            settings.resolution().1 as u32,
             1,
             gl::SHADER_IMAGE_ACCESS_BARRIER_BIT,
         );
@@ -173,8 +173,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let num_groups_y = (preprocess.draw_end_y - preprocess.draw_start_y) as u32;
 
                 sprite_shader.dispatch(
-                    num_groups_x.clamp(0, settings.resolution.0),
-                    num_groups_y.clamp(0, settings.resolution.1),
+                    num_groups_x.clamp(0, settings.resolution().0),
+                    num_groups_y.clamp(0, settings.resolution().1),
                     1,
                     gl::SHADER_IMAGE_ACCESS_BARRIER_BIT,
                 );

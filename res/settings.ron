@@ -1,4 +1,4 @@
-Settings(
+SettingsCore(
     resolution: (800, 600),
     language: "en_GB",
 )

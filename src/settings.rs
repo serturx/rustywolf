@@ -1,22 +1,29 @@
+use crate::gpu::{self, SSBO};
+
 use super::gpu::ISSBO;
 use serde::Deserialize;
 use std::fs;
 
 const RES_SETTINGS: &str = "./res/settings.ron";
 
-#[derive(Deserialize)]
-#[repr(C)]
 pub struct Settings {
-    pub resolution: (u32, u32),
-    pub language: String,
+    core: SettingsCore,
+    _ssbo: SSBO,
 }
 
-impl ISSBO for Settings {}
+#[derive(Deserialize)]
+#[repr(C)]
+pub struct SettingsCore {
+    resolution: (u32, u32),
+    language: String,
+}
+
+impl ISSBO for SettingsCore {}
 
 impl Settings {
     pub fn load() -> Settings {
-        match fs::read_to_string(RES_SETTINGS) {
-            Ok(file_content) => match ron::from_str::<Settings>(&file_content) {
+        let core = match fs::read_to_string(RES_SETTINGS) {
+            Ok(file_content) => match ron::from_str::<SettingsCore>(&file_content) {
                 Ok(settings) => settings,
                 Err(e) => {
                     eprintln!("Couldn't load settings, using defaults: {}", e.to_string());
@@ -27,13 +34,31 @@ impl Settings {
                 eprintln!("Couldn't load settings, using defaults: {}", e.to_string());
                 Settings::default()
             }
+        };
+
+        Settings {
+            core,
+            _ssbo: gpu::SSBO::null(),
         }
     }
 
-    fn default() -> Settings {
-        Settings {
+    fn default() -> SettingsCore {
+        SettingsCore {
             resolution: (800, 600),
             language: String::from("en_GB"),
         }
+    }
+
+    pub fn copy_to_gpu(&mut self) {
+        let ssbo = gpu::SSBO::from(1, &self.core, gl::STATIC_DRAW);
+        self._ssbo = ssbo;
+    }
+
+    pub fn resolution(&self) -> &(u32, u32) {
+        return &self.core.resolution;
+    }
+
+    pub fn language(&self) -> &String {
+        return &self.core.language;
     }
 }

@@ -52,6 +52,10 @@ impl SSBO {
         return SSBO { id: ssbo_id };
     }
 
+    pub fn null() -> SSBO {
+        SSBO { id: 0 }
+    }
+
     pub fn empty(binding: u32, len: isize, usage: gl::types::GLenum) -> SSBO {
         let mut ssbo_id: u32 = 0;
 
