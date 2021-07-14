@@ -68,12 +68,12 @@ impl SSBO {
         return SSBO { id: ssbo_id };
     }
 
-    pub fn update<T: ISSBO>(&self, obj: &T) {
+    pub fn update<T: ISSBO>(&self, obj: &T, offset: isize) {
         unsafe {
             gl::BindBuffer(gl::SHADER_STORAGE_BUFFER, self.id);
 
             let (len, data) = obj.gpu_format();
-            gl::NamedBufferSubData(self.id, 0, len, data);
+            gl::NamedBufferSubData(self.id, offset, len, data);
 
             gl::BindBuffer(gl::SHADER_STORAGE_BUFFER, 0);
         }

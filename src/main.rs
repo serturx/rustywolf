@@ -14,7 +14,7 @@ use player::Player;
 use settings::Settings;
 use vector::Vector2;
 
-use crate::sprites::Sprites;
+use crate::sprites::{Sprite, Sprites};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS)?;
@@ -120,7 +120,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         player.update_position(&world, delta_time);
         player.rotate_by_mouse(&mouse_delta, delta_time);
-        gpu_player.update(&player);
+        gpu_player.update(&player, 0);
 
         sprites.update(&player);
 
