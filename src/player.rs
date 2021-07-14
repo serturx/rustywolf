@@ -1,3 +1,5 @@
+use crate::gpu::{self, SSBO};
+
 use super::gpu::ISSBO;
 use super::vector::Vector2;
 use super::world::World;
@@ -11,34 +13,54 @@ pub const BACKWARDS: MoveDir = 1;
 pub const RIGHT: MoveDir = 2;
 pub const LEFT: MoveDir = 3;
 
-#[repr(C)]
 pub struct Player {
+    transform: Transform,
+    movement: [bool; 4], //Forward,Backward,Right,Left
+    ssbo: SSBO,
+}
+
+#[repr(C)]
+struct Transform {
     position: Vector2<f32>,
     direction: Vector2<f32>,
     camera_plane: Vector2<f32>,
-    movement: [bool; 4], //Forward,Backward,Right,Left
 }
 
-impl ISSBO for Player {}
+impl ISSBO for Transform {}
 
 impl Player {
     pub fn from(position: Vector2<f32>) -> Player {
-        return Player {
+        let transform = Transform {
             position,
             direction: Vector2::new(-0.75, 0.0),
             camera_plane: Vector2::new(0.0, 0.66),
-            movement: [false, false, false, false],
         };
+
+        let ssbo = gpu::SSBO::from(2, &transform, gl::DYNAMIC_DRAW);
+
+        Player {
+            transform,
+            movement: [false, false, false, false],
+            ssbo,
+        }
+    }
+
+    pub fn copy_to_gpu(&self) {
+        self.ssbo.update(&self.transform, 0);
     }
 
     fn rotate(&mut self, angle: f32) {
-        let old_dir_x = self.direction.x;
-        self.direction.x = self.direction.x * angle.cos() - self.direction.y * angle.sin();
-        self.direction.y = old_dir_x * angle.sin() + self.direction.y * angle.cos();
+        let old_dir_x = self.transform.direction.x;
+        self.transform.direction.x =
+            self.transform.direction.x * angle.cos() - self.transform.direction.y * angle.sin();
+        self.transform.direction.y =
+            old_dir_x * angle.sin() + self.transform.direction.y * angle.cos();
 
-        let old_plane_x = self.camera_plane.x;
-        self.camera_plane.x = self.camera_plane.x * angle.cos() - self.camera_plane.y * angle.sin();
-        self.camera_plane.y = old_plane_x * angle.sin() + self.camera_plane.y * angle.cos();
+        let old_plane_x = self.transform.camera_plane.x;
+        self.transform.camera_plane.x = self.transform.camera_plane.x * angle.cos()
+            - self.transform.camera_plane.y * angle.sin();
+        self.transform.camera_plane.y =
+            old_plane_x * angle.sin() + self.transform.camera_plane.y * angle.cos();
     }
 
     pub fn rotate_by_mouse(&mut self, rel_mov: &Vector2<f32>, delta_time: f32) {
@@ -72,54 +94,62 @@ impl Player {
     }
 
     fn step_forward(&mut self, world: &World, delta_time: f32) {
-        let future_x = self.position.x + self.direction.x * MOVEMENT_SPEED * delta_time;
-        if *world.at(future_x as u32, self.position.y as u32) == 0 {
-            self.position.x = future_x;
+        let future_x =
+            self.transform.position.x + self.transform.direction.x * MOVEMENT_SPEED * delta_time;
+        if *world.at(future_x as u32, self.transform.position.y as u32) == 0 {
+            self.transform.position.x = future_x;
         }
 
-        let future_y = self.position.y + self.direction.y * MOVEMENT_SPEED * delta_time;
-        if *world.at(self.position.x as u32, future_y as u32) == 0 {
-            self.position.y = future_y;
+        let future_y =
+            self.transform.position.y + self.transform.direction.y * MOVEMENT_SPEED * delta_time;
+        if *world.at(self.transform.position.x as u32, future_y as u32) == 0 {
+            self.transform.position.y = future_y;
         }
     }
 
     fn step_backward(&mut self, world: &World, delta_time: f32) {
-        let future_x = self.position.x - self.direction.x * MOVEMENT_SPEED * delta_time;
-        if *world.at(future_x as u32, self.position.y as u32) == 0 {
-            self.position.x = future_x;
+        let future_x =
+            self.transform.position.x - self.transform.direction.x * MOVEMENT_SPEED * delta_time;
+        if *world.at(future_x as u32, self.transform.position.y as u32) == 0 {
+            self.transform.position.x = future_x;
         }
 
-        let future_y = self.position.y - self.direction.y * MOVEMENT_SPEED * delta_time;
-        if *world.at(self.position.x as u32, future_y as u32) == 0 {
-            self.position.y = future_y;
+        let future_y =
+            self.transform.position.y - self.transform.direction.y * MOVEMENT_SPEED * delta_time;
+        if *world.at(self.transform.position.x as u32, future_y as u32) == 0 {
+            self.transform.position.y = future_y;
         }
     }
 
     fn step_right(&mut self, world: &World, delta_time: f32) {
-        let future_x = self.position.x + self.camera_plane.x * MOVEMENT_SPEED * delta_time;
-        if *world.at(future_x as u32, self.position.y as u32) == 0 {
-            self.position.x = future_x;
+        let future_x =
+            self.transform.position.x + self.transform.camera_plane.x * MOVEMENT_SPEED * delta_time;
+        if *world.at(future_x as u32, self.transform.position.y as u32) == 0 {
+            self.transform.position.x = future_x;
         }
 
-        let future_y = self.position.y + self.camera_plane.y * MOVEMENT_SPEED * delta_time;
-        if *world.at(self.position.x as u32, future_y as u32) == 0 {
-            self.position.y = future_y;
+        let future_y =
+            self.transform.position.y + self.transform.camera_plane.y * MOVEMENT_SPEED * delta_time;
+        if *world.at(self.transform.position.x as u32, future_y as u32) == 0 {
+            self.transform.position.y = future_y;
         }
     }
 
     fn step_left(&mut self, world: &World, delta_time: f32) {
-        let future_x = self.position.x - self.camera_plane.x * MOVEMENT_SPEED * delta_time;
-        if *world.at(future_x as u32, self.position.y as u32) == 0 {
-            self.position.x = future_x;
+        let future_x =
+            self.transform.position.x - self.transform.camera_plane.x * MOVEMENT_SPEED * delta_time;
+        if *world.at(future_x as u32, self.transform.position.y as u32) == 0 {
+            self.transform.position.x = future_x;
         }
 
-        let future_y = self.position.y - self.camera_plane.y * MOVEMENT_SPEED * delta_time;
-        if *world.at(self.position.x as u32, future_y as u32) == 0 {
-            self.position.y = future_y;
+        let future_y =
+            self.transform.position.y - self.transform.camera_plane.y * MOVEMENT_SPEED * delta_time;
+        if *world.at(self.transform.position.x as u32, future_y as u32) == 0 {
+            self.transform.position.y = future_y;
         }
     }
 
     pub fn position(&self) -> &Vector2<f32> {
-        return &self.position;
+        return &self.transform.position;
     }
 }

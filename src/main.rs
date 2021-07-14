@@ -14,7 +14,7 @@ use player::Player;
 use settings::Settings;
 use vector::Vector2;
 
-use crate::sprites::{Sprite, Sprites};
+use crate::sprites::Sprites;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS)?;
@@ -70,7 +70,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let sprite_shader = gpu::Shader::from("./src/shader/sprites/compute.glsl", gl::COMPUTE_SHADER)?;
 
-    //gpu::debug::init();
+    gpu::debug::init();
     let gpu_framebuffer = gpu::Framebuffer::create(
         0,
         settings.resolution.0 as i32,
@@ -78,7 +78,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     );
 
     let _gpu_settings = gpu::SSBO::from(1, &settings, gl::STATIC_DRAW);
-    let gpu_player = gpu::SSBO::from(2, &player, gl::DYNAMIC_DRAW);
 
     let map_data = world.as_vec_for_gpu();
     let _gpu_map = gpu::SSBO::from(3, &map_data, gl::STATIC_DRAW);
@@ -112,7 +111,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         delta_time = now.elapsed().as_secs_f32();
         now = Instant::now();
 
-        println!("{}", 1.0 / delta_time);
+        //println!("{}", 1.0 / delta_time);
 
         let (mx, my) = window.get_cursor_pos();
         mouse_delta.set(mx as f32 - mouse_pos.x, my as f32 - mouse_pos.y);
@@ -120,7 +119,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         player.update_position(&world, delta_time);
         player.rotate_by_mouse(&mouse_delta, delta_time);
-        gpu_player.update(&player, 0);
+        player.copy_to_gpu();
 
         sprites.update(&player);
 
