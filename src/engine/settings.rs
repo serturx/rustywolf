@@ -1,6 +1,6 @@
 use crate::gpu::{self, SSBO};
 
-use super::gpu::ISSBO;
+use crate::gpu::ISSBO;
 use serde::Deserialize;
 use std::fs;
 

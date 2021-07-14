@@ -1,7 +1,10 @@
 use serde::Deserialize;
 use std::fs;
 
-use crate::sprites::Sprite;
+use crate::{
+    engine::sprites::Sprite,
+    gpu::{self, SSBO},
+};
 
 #[derive(Deserialize)]
 #[repr(C)]
@@ -39,6 +42,7 @@ pub struct World {
     identifier: String,
     structure: WorldStructure,
     spritesheet: image::DynamicImage,
+    _ssbo: SSBO,
 }
 
 impl World {
@@ -52,10 +56,14 @@ impl World {
         let spritesheet_path = full_path + "sheet.png";
         let spritesheet = image::open(spritesheet_path)?;
 
+        let layout_gpu = layout.as_vec_for_gpu();
+        let _ssbo = gpu::SSBO::from(3, &layout_gpu, gl::STATIC_DRAW);
+
         let world = World {
             identifier: String::from(identifier),
             structure: layout,
             spritesheet,
+            _ssbo,
         };
 
         Ok(world)
@@ -63,10 +71,6 @@ impl World {
 
     pub fn identifier(&self) -> &String {
         return &self.identifier;
-    }
-
-    pub fn as_vec_for_gpu(&self) -> Vec<u32> {
-        return self.structure.as_vec_for_gpu();
     }
 
     pub fn sprites(&self) -> &Vec<Sprite> {

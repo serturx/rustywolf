@@ -1,8 +1,8 @@
 use crate::gpu::{self, SSBO};
 
-use super::gpu::ISSBO;
 use super::vector::Vector2;
 use super::world::World;
+use crate::gpu::ISSBO;
 
 const ROTATION_SPEED: f32 = 0.5;
 const MOVEMENT_SPEED: f32 = 5.0;

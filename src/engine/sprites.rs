@@ -1,10 +1,10 @@
 use std::{cell::RefCell, rc::Rc};
 
 use crate::{
+    engine::vector::Vector2,
+    engine::world::World,
     gpu::{self, ISSBO, SSBO},
     player::Player,
-    vector::Vector2,
-    world::World,
 };
 use serde::Deserialize;
 

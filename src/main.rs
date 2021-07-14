@@ -1,20 +1,10 @@
+mod engine;
 mod gpu;
-mod localisation;
-mod player;
-mod settings;
-mod sprites;
-mod vector;
-mod world;
+
+use crate::engine::{player, I18n, Player, Settings, Sprites, Vector2, World};
 
 use glfw::{Action, Context, Key};
 use std::time::Instant;
-
-use localisation::I18n;
-use player::Player;
-use settings::Settings;
-use vector::Vector2;
-
-use crate::sprites::Sprites;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS)?;
@@ -43,11 +33,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     glfw.set_swap_interval(glfw::SwapInterval::Sync(1));
 
-    let i18n = I18n::from("en_GB")?;
+    let i18n = I18n::from(settings.language())?;
 
     let mut player = Player::from(Vector2::new(2.0, 2.0));
 
-    let world = world::World::load("test_map_2")?;
+    let world = World::load("test_map_2")?;
     println!("Playing {}", i18n.get_translation(world.identifier()));
 
     let mut sprites = Sprites::new(&world, &player);
@@ -78,9 +68,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         settings.resolution().0 as i32,
         settings.resolution().1 as i32,
     );
-
-    let map_data = world.as_vec_for_gpu();
-    let _gpu_map = gpu::SSBO::from(3, &map_data, gl::STATIC_DRAW);
 
     let (sheet, tile_width) = world.sampler_data();
     let _sampler = gpu::TextureSampler::from(4, sheet, tile_width);
