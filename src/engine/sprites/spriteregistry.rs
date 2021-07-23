@@ -15,7 +15,7 @@ use super::tilesheet::{Tilesheet, VecTilesheetExt};
 //SpriteAsset -> Tilesheet  -> entry in registry
 
 pub struct SpriteRegistry {
-    sampler: TextureSampler,
+    _sampler: TextureSampler,
     sprites_ssbo: SSBO,
     preprocess_ssbo: SSBO,
     gpu_capacity: isize,
@@ -97,7 +97,7 @@ impl SpriteRegistry {
         let gpu_capacity: isize = 1;
 
         let mut registry = SpriteRegistry {
-            sampler,
+            _sampler: sampler,
             sprites_ssbo,
             preprocess_ssbo,
             gpu_capacity,
