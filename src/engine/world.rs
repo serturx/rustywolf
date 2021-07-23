@@ -141,6 +141,10 @@ impl World {
         return &self.structure.layout[(x + y * self.structure.layout_stride) as usize];
     }
 
+    pub fn sprites(&mut self) -> &mut SpriteRegistry {
+        &mut self.sprite_registry
+    }
+
     pub fn render(&mut self, player: &Player) {
         self.sprite_registry.update(player);
 

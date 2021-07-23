@@ -107,11 +107,7 @@ impl SpriteRegistry {
 
         let mut sprite_instances: Vec<Rc<RefCell<Sprite>>> = Vec::new();
         for tup in world_sprites {
-            match registry.instantiate(
-                &OsString::from(&tup.0),
-                &tup.1,
-                &Self::angle_to_vector(tup.2),
-            ) {
+            match registry.instantiate(&tup.0, &tup.1, tup.2) {
                 Some(sprite) => sprite_instances.push(sprite),
                 None => {}
             }
@@ -126,14 +122,15 @@ impl SpriteRegistry {
 
     pub fn instantiate(
         &mut self,
-        sprite_id: &OsString,
+        sprite_id: &str,
         pos: &Vector2<f32>,
-        dir: &Vector2<f32>,
+        dir: f32,
     ) -> Option<Rc<RefCell<Sprite>>> {
-        let template = self.sprite_templates.get(sprite_id)?;
+        let sprite_id = OsString::from(sprite_id);
+        let template = self.sprite_templates.get(&sprite_id)?;
         let sprite = Rc::new(RefCell::new(Sprite::new(
             pos.clone(),
-            dir.clone(),
+            Self::angle_to_vector(dir),
             template,
         )));
         self.sprite_instances.push(sprite.clone());

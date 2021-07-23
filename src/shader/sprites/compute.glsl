@@ -110,7 +110,7 @@ void main()
 	float dx = player.position.x - sprite.x_pos;
 	float dy = player.position.y - sprite.y_pos;
 
-	float angle_to_player = atan(dy, dx) - atan(sprite.y_dir, sprite.x_dir) - (M_PI / 4);
+	float angle_to_player = atan(dy, dx) - atan(sprite.y_dir, sprite.x_dir) - (M_PI / sprite.view_angle_count);
 
 	//move angle_to_player to the range [0,2PI)
 	if (angle_to_player < 0)
