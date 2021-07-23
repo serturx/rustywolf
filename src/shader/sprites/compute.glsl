@@ -7,6 +7,12 @@ layout(std430, binding = 1) buffer Settings {
 	int resolution_y;
 } settings;
 
+layout(std430, binding = 2) buffer PlayerData {
+	vec2 position;
+	vec2 direction;
+	vec2 camera_plane;
+} player;
+
 layout(std430, binding = 3) buffer World {
 	uint ceiling_texture_idx;
 	uint floor_texture_idx;
@@ -60,6 +66,8 @@ layout(std430, binding = 9) buffer Sprite_Preprocess_Results {
 
 uniform uint sprite_idx;
 
+#define M_PI 3.141592654
+
 float line_height_to_lod(int line_height)
 {
 	double perp_wall_dist = double(settings.resolution_x) / double(line_height);
@@ -71,7 +79,7 @@ float line_height_to_lod(int line_height)
 	return lod;
 }
 
-vec4 get_atlas_color(Sprite sprite, int x, int y, float lod)
+vec4 get_atlas_color(Sprite sprite, int view_angle_idx, int x, int y, float lod)
 {
 	float x_n = float(x) / float(sprite.tile_width);
 	float y_n = float(y) / float(sprite.tile_height);
@@ -79,12 +87,36 @@ vec4 get_atlas_color(Sprite sprite, int x, int y, float lod)
 	float x_center_offset = 1.0 / (float(sprite.tile_width) * 2.0);
 	float y_center_offset = 1.0 / (float(sprite.tile_height) * 2.0);
 
-	return textureLod(tex_atlas, vec3(x_n + x_center_offset, y_n + y_center_offset, sprite.texture_base_index), lod);
+	return textureLod(
+		tex_atlas,
+		vec3(
+			x_n + x_center_offset,
+			y_n + y_center_offset,
+			sprite.texture_base_index + (sprite.animation_index + view_angle_idx * (sprite.animation_count + 1))),
+		lod);
+}
+
+float map(float value, float in_min, float in_max, float out_min, float out_max)
+{
+	return out_min + (out_max - out_min) * (value - in_min) / (in_max - in_min);
 }
 
 void main()
 {
 	ivec2 iCoords = ivec2(gl_GlobalInvocationID.xy);
+
+	Sprite sprite = sprites.list[sprite_idx];
+
+	float dx = player.position.x - sprite.x_pos;
+	float dy = player.position.y - sprite.y_pos;
+
+	float angle_to_player = atan(dy, dx) - atan(sprite.y_dir, sprite.x_dir) - (M_PI / 4);
+
+	//move angle_to_player to the range [0,2PI)
+	if (angle_to_player < 0)
+		angle_to_player += 2 * M_PI;
+
+	int view_angle_idx = int(map(angle_to_player, 2 * M_PI, 0, 0, sprite.view_angle_count));
 
 	Sprite_Preprocess_Result preprocess = sprite_preprocess.results[sprite_idx];
 
@@ -93,10 +125,10 @@ void main()
 	if (preprocess.transform_y < z_buffer.data[iCoords.x]) {
 		int d = iCoords.y * 256 - settings.resolution_y * 128 + preprocess.sprite_height * 128;
 
-		int tex_x = int(256 * (iCoords.x - (-preprocess.sprite_width / 2 + preprocess.sprite_screen_x)) * sprites.list[sprite_idx].tile_width / preprocess.sprite_width) / 256;
-		int tex_y = int(((d * sprites.list[sprite_idx].tile_height) / preprocess.sprite_height) / 256);
+		int tex_x = int(256 * (iCoords.x - (-preprocess.sprite_width / 2 + preprocess.sprite_screen_x)) * sprite.tile_width / preprocess.sprite_width) / 256;
+		int tex_y = int(((d * sprite.tile_height) / preprocess.sprite_height) / 256);
 
-		vec4 color = get_atlas_color(sprites.list[sprite_idx], tex_x, tex_y, line_height_to_lod(preprocess.draw_end_y - preprocess.draw_start_y));
+		vec4 color = get_atlas_color(sprite, view_angle_idx, tex_x, tex_y, line_height_to_lod(preprocess.draw_end_y - preprocess.draw_start_y));
 		vec4 base = imageLoad(img, iCoords);
 
 		color = (color * color.a) + (base * (1 - color.a));

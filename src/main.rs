@@ -22,7 +22,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     window.set_key_polling(true);
     window.make_current();
-    //window.set_cursor_mode(glfw::CursorMode::Disabled);
+    window.set_cursor_mode(glfw::CursorMode::Disabled);
     if window.uses_raw_mouse_motion() {
         window.set_raw_mouse_motion(true);
     }
