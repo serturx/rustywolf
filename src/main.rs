@@ -1,7 +1,7 @@
 mod engine;
 mod gpu;
 
-use crate::engine::{player, I18n, Player, Settings, Sprites, Vector2, World};
+use crate::engine::{player, I18n, Player, Settings, Vector2, World};
 
 use glfw::{Action, Context, Key};
 use std::time::Instant;
@@ -22,7 +22,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     window.set_key_polling(true);
     window.make_current();
-    window.set_cursor_mode(glfw::CursorMode::Disabled);
+    //window.set_cursor_mode(glfw::CursorMode::Disabled);
     if window.uses_raw_mouse_motion() {
         window.set_raw_mouse_motion(true);
     }
@@ -37,56 +37,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut player = Player::from(Vector2::new(2.0, 2.0));
 
-    let world = World::load("test_map_2")?;
+    let mut world = World::load("test_map_2", *settings.resolution(), &player)?;
     println!("Playing {}", i18n.get_translation(world.identifier()));
-
-    let mut sprites = Sprites::new(&world, &player);
-
-    let pre_cf_shader = gpu::Shader::from(
-        "./src/shader/ceiling_floor/preprocess.glsl",
-        gl::COMPUTE_SHADER,
-    )?;
-
-    let cf_shader = gpu::Shader::from(
-        "./src/shader/ceiling_floor/compute.glsl",
-        gl::COMPUTE_SHADER,
-    )?;
-
-    let pre_walls_shader =
-        gpu::Shader::from("./src/shader/walls/preprocess.glsl", gl::COMPUTE_SHADER)?;
-
-    let walls_shader = gpu::Shader::from("./src/shader/walls/compute.glsl", gl::COMPUTE_SHADER)?;
-
-    let pre_sprite_shader =
-        gpu::Shader::from("./src/shader/sprites/preprocess.glsl", gl::COMPUTE_SHADER)?;
-
-    let sprite_shader = gpu::Shader::from("./src/shader/sprites/compute.glsl", gl::COMPUTE_SHADER)?;
-
-    // gpu::debug::init();
-    let gpu_framebuffer = gpu::Framebuffer::create(
-        0,
-        settings.resolution().0 as i32,
-        settings.resolution().1 as i32,
-    );
-
-    let (sheet, tile_width) = world.sampler_data();
-    let _sampler = gpu::TextureSampler::from(4, sheet, tile_width);
-
-    let _gpu_slice_data = gpu::SSBO::empty(
-        5,
-        3 * settings.resolution().0 as isize * gpu::INT,
-        gl::DYNAMIC_DRAW,
-    );
-    let _gpu_caf_data = gpu::SSBO::empty(
-        6,
-        4 * settings.resolution().1 as isize * gpu::FLOAT,
-        gl::DYNAMIC_DRAW,
-    );
-    let _gpu_z_buffer = gpu::SSBO::empty(
-        7,
-        settings.resolution().0 as isize * gpu::DOUBLE,
-        gl::DYNAMIC_DRAW,
-    );
 
     let mut delta_time: f32;
     let mut now = Instant::now();
@@ -108,8 +60,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         player.rotate_by_mouse(&mouse_delta, delta_time);
         player.copy_to_gpu();
 
-        sprites.update(&player);
-
         glfw.poll_events();
         for (_, event) in glfw::flush_messages(&events) {
             handle_window_event(&mut window, event, &mut player);
@@ -120,55 +70,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             gl::Clear(gl::COLOR_BUFFER_BIT);
         }
 
-        pre_cf_shader.dispatch(
-            1,
-            settings.resolution().1 as u32,
-            1,
-            gl::SHADER_STORAGE_BARRIER_BIT,
-        );
-
-        cf_shader.dispatch(
-            settings.resolution().0 as u32,
-            settings.resolution().1 as u32,
-            1,
-            gl::SHADER_IMAGE_ACCESS_BARRIER_BIT,
-        );
-
-        pre_walls_shader.dispatch(
-            settings.resolution().0 as u32,
-            1,
-            1,
-            gl::SHADER_STORAGE_BARRIER_BIT,
-        );
-
-        walls_shader.dispatch(
-            settings.resolution().0 as u32,
-            settings.resolution().1 as u32,
-            1,
-            gl::SHADER_IMAGE_ACCESS_BARRIER_BIT,
-        );
-
-        pre_sprite_shader.dispatch(1, 1, sprites.len() as u32, gl::SHADER_STORAGE_BARRIER_BIT);
-
-        for i in 0..sprites.len() as u32 {
-            sprite_shader.set_uint("sprite_idx", i);
-
-            let preprocess = sprites.preprocess_result(i);
-
-            if preprocess.draw_end_x >= preprocess.draw_start_x && preprocess.transform_y > 0.0 {
-                let num_groups_x = (preprocess.draw_end_x - preprocess.draw_start_x) as u32;
-                let num_groups_y = (preprocess.draw_end_y - preprocess.draw_start_y) as u32;
-
-                sprite_shader.dispatch(
-                    num_groups_x.clamp(0, settings.resolution().0),
-                    num_groups_y.clamp(0, settings.resolution().1),
-                    1,
-                    gl::SHADER_IMAGE_ACCESS_BARRIER_BIT,
-                );
-            }
-        }
-
-        gpu_framebuffer.blit();
+        world.render(&player);
         window.swap_buffers();
     }
 

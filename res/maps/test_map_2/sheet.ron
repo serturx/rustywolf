@@ -1,0 +1,5 @@
+SpriteAsset(
+    file: "sheet.png",
+    columns: 14,
+    rows: 7,
+)

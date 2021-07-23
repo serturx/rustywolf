@@ -16,7 +16,16 @@ layout(std430, binding = 2) buffer PlayerData {
 struct Sprite {
 	float	x_pos;
 	float	y_pos;
-	uint	texture_idx;
+	float	x_dir;
+	float	y_dir;
+
+	int	texture_base_index;
+	int	animation_count;
+	int	view_angle_count;
+	int	tile_width;
+	int	tile_height;
+
+	int	animation_index;
 };
 
 layout(std430, binding = 8) buffer SpriteBuffer {
