@@ -1,6 +1,6 @@
 use crate::gpu::{self, SSBO};
 
-use super::vector::Vector2;
+use super::util::Vector2;
 use super::world::World;
 use crate::gpu::ISSBO;
 

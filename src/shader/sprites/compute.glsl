@@ -40,6 +40,8 @@ struct Sprite {
 	int	tile_height;
 
 	int	animation_index;
+	int	animation_tick_period;
+	int	animation_tick;
 };
 
 layout(std430, binding = 8) buffer SpriteBuffer {

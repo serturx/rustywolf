@@ -1,4 +1,4 @@
-use crate::{engine::Vector2, gpu::ISSBO};
+use crate::{engine::util::Vector2, gpu::ISSBO};
 
 ///Layout(linear on gpu)
 ///N: Number of different animation sprites per view-angle
@@ -17,6 +17,8 @@ pub struct Sprite {
 
     template: SpriteTemplate,
     animation_index: i32,
+    animation_tick_period: i32,
+    animation_tick: i32,
 }
 
 impl ISSBO for Sprite {}
@@ -32,11 +34,34 @@ impl Sprite {
             direction,
             animation_index: 0,
             template: (*template).clone(),
+            animation_tick_period: 30,
+            animation_tick: 0,
         }
+    }
+
+    pub fn move_by(&mut self, speed: f32, delta_time: f32) {
+        self.position += self.direction * speed * delta_time;
+
+        self.animation_tick += 1;
+        if self.animation_tick != self.animation_tick_period {
+            return;
+        }
+
+        if !self.animating() {
+            self.start_animation();
+        } else {
+            self.next_frame();
+        }
+
+        self.animation_tick = 0;
     }
 
     pub fn position(&self) -> &Vector2<f32> {
         &self.position
+    }
+
+    fn animating(&self) -> bool {
+        self.animation_index > 0
     }
 
     pub fn start_animation(&mut self) {
@@ -47,7 +72,13 @@ impl Sprite {
         self.animation_index = 0;
     }
 
-    pub fn tick(&self) {}
+    pub fn next_frame(&mut self) {
+        self.animation_index += 1;
+
+        if self.animation_index > self.template.animation_count {
+            self.animation_index = 1;
+        }
+    }
 }
 
 #[derive(Clone)]

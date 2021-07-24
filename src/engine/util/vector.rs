@@ -2,7 +2,7 @@ use std::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 use serde::Deserialize;
 
-#[derive(Deserialize, Clone)]
+#[derive(Deserialize, Clone, Copy)]
 #[repr(C)]
 pub struct Vector2<T> {
     pub x: T,
@@ -24,6 +24,10 @@ impl<T: Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Copy> Vector2<T> {
         let dy = self.y - other.y;
 
         dx * dx + dy * dy
+    }
+
+    pub fn mag_sq(&self) -> T {
+        self.x * self.x + self.y * self.y
     }
 }
 

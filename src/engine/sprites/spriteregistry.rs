@@ -1,6 +1,6 @@
 use crate::engine::sprites::spriteasset::SpriteAsset;
 use crate::engine::sprites::Sprite;
-use crate::engine::{Player, Vector2};
+use crate::engine::{util::Vector2, Player};
 use crate::gpu::{TextureSampler, SSBO};
 use std::cell::RefCell;
 use std::collections::HashMap;
